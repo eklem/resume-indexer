@@ -6,7 +6,7 @@ var options = {
     indexPath: 'resume-si',
     logLevel: 'info',
     logSilent: false,
-    nGramLength: 3
+    nGramLength: [1, 2, 3, 4]
 }
 var si = require('search-index')(options)
 var jf = require('jsonfile')
