@@ -23,7 +23,7 @@ gsheets.getWorksheet(config.gsheetsKey, config.categories, function (err, result
     if (err) {
         console.dir(err);
     }
-    //console.dir(result.data);
+    console.dir(result.data);
     // Check if ANY changes since last indexing process
     if (result.updated != config.gsheetLastUpdated) {
 
@@ -35,14 +35,21 @@ gsheets.getWorksheet(config.gsheetsKey, config.categories, function (err, result
         for (var j = 0; j < result.data.length; j++) {
             var obj = result.data[j]
             // Document processing the rest
-            obj.id = ifttnorch.id(obj.categories + obj.title);
+            obj.id = ifttnorch.id(obj.title + obj.text);
             obj.categories = [obj.categories];
+            obj.myrole = ifttnorch.tagslist(obj.myrole);
             obj.types = ifttnorch.tagslist(obj.types);
             obj.tags = ifttnorch.tagslist(obj.tags);
             obj.teasertext = ifttnorch.sanitizehtml(obj.text, [], {});
+            obj.projecturl = ifttnorch.links(obj.projecturl);
+
             // Push to the array that will be indexed + array for latest update
-            newItems.push(obj)
-            datesUpdated.push(obj.date)
+//            console.dir(obj);
+//            console.dir(obj.tags);
+//            console.dir(obj.imageurl);
+//            console.dir(obj.urls);
+            newItems.push(obj);
+//            datesUpdated.push(obj.date);
         }
 
         //Index newItems and update config-file with new dates
@@ -51,7 +58,7 @@ gsheets.getWorksheet(config.gsheetsKey, config.categories, function (err, result
             fieldOptions: [
                {fieldName: 'categories', filter: true},
                {fieldName: 'types', filter: true},
-               {fieldName: 'tags', filter: true}
+               {fieldName: 'tags', filter: true},
             ]
 
         }, function (err) {

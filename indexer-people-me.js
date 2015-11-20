@@ -6,12 +6,12 @@ var options = {
     indexPath: 'resume-si',
     logLevel: 'info',
     logSilent: false,
-    nGramLength: [1, 2, 3, 4]
+        nGramLength: [1, 2, 3, 4]
 }
 var si = require('search-index')(options)
 var jf = require('jsonfile')
 var util = require('util')
-var configfile = '/Users/eklem/node_modules/resume-indexer/config/config-resume-knowledge.json'
+var configfile = '/Users/eklem/node_modules/resume-indexer/config/config-resume-people.json'
 
 
 // Read config file
@@ -37,21 +37,26 @@ gsheets.getWorksheet(config.gsheetsKey, config.categories, function (err, result
             // Document processing the rest
             obj.id = ifttnorch.id(obj.title + obj.text);
             obj.categories = [obj.categories];
+            obj.organization = ifttnorch.tagslist(obj.organization);
             obj.types = ifttnorch.tagslist(obj.types);
             obj.tags = ifttnorch.tagslist(obj.tags);
             obj.teasertext = ifttnorch.sanitizehtml(obj.text, [], {});
             // Push to the array that will be indexed + array for latest update
-            newItems.push(obj)
-            datesUpdated.push(obj.date)
+            if (obj.types[0] == 'myself') {
+                newItems.push(obj)
+                datesUpdated.push(obj.date)
+            }
         }
 
         //Index newItems and update config-file with new dates
         si.add(newItems, {
             'batchName': config.categories,
             fieldOptions: [
-               {fieldName: 'categories', filter: true},
-               {fieldName: 'types', filter: true},
-               {fieldName: 'tags', filter: true}
+                {fieldName: 'title',  weight: 3},
+                {fieldName: 'text',  weight: 4},
+                {fieldName: 'categories', filter: true},
+                {fieldName: 'types', filter: true},
+                {fieldName: 'tags', filter: true}
             ]
 
         }, function (err) {

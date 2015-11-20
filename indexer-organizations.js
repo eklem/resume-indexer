@@ -1,17 +1,18 @@
 // Modules and stuff required
-var gsheets = require('gsheets')
-var fs = require('fs-extra')
-var ifttnorch = require('iftt-norch-tools')
+var gsheets = require('gsheets');
+var fs = require('fs-extra');
+var ifttnorch = require('iftt-norch-tools');
+var moment = require('moment');
 var options = {
     indexPath: 'resume-si',
     logLevel: 'info',
     logSilent: false,
-        nGramLength: [1, 2, 3, 4]
-}
-var si = require('search-index')(options)
-var jf = require('jsonfile')
-var util = require('util')
-var configfile = '/Users/eklem/node_modules/resume-indexer/config/config-resume-organizations.json'
+    nGramLength: [1, 2, 3, 4]
+};
+var si = require('search-index')(options);
+var jf = require('jsonfile');
+var util = require('util');
+var configfile = '/Users/eklem/node_modules/resume-indexer/config/config-resume-organizations.json';
 
 
 // Read config file
@@ -35,11 +36,14 @@ gsheets.getWorksheet(config.gsheetsKey, config.categories, function (err, result
         for (var j = 0; j < result.data.length; j++) {
             var obj = result.data[j]
             // Document processing the rest
-            obj.id = ifttnorch.id(obj.categories + obj.title);
+            obj.id = ifttnorch.id(obj.title + obj.text);
             obj.categories = [obj.categories];
             obj.types = ifttnorch.tagslist(obj.types);
             obj.tags = ifttnorch.tagslist(obj.tags);
-            obj.teasertext = ifttnorch.sanitizehtml(obj.text, [], {});
+            obj.teasertext = ifttnorch.sanitizehtml(obj.text, [], {})
+            obj.roles = ifttnorch.tagslist(obj.roles);
+            obj.datestart = moment(obj.datestart, "YYYYMMDD").format("YYYY, MMMM Do");
+            obj.dateend = moment(obj.dateend, "YYYYMMDD").format("YYYY, MMMM Do");
             // Push to the array that will be indexed + array for latest update
             newItems.push(obj)
             datesUpdated.push(obj.date)

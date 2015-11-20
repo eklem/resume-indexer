@@ -35,22 +35,23 @@ gsheets.getWorksheet(config.gsheetsKey, config.categories, function (err, result
         for (var j = 0; j < result.data.length; j++) {
             var obj = result.data[j]
             // Document processing the rest
-            obj.id = ifttnorch.id(obj.categories + obj.title);
+            obj.id = ifttnorch.id(obj.title + obj.text);
             obj.categories = [obj.categories];
+            obj.organization = ifttnorch.tagslist(obj.organization);
             obj.types = ifttnorch.tagslist(obj.types);
             obj.tags = ifttnorch.tagslist(obj.tags);
             obj.teasertext = ifttnorch.sanitizehtml(obj.text, [], {});
             // Push to the array that will be indexed + array for latest update
-            newItems.push(obj)
-            datesUpdated.push(obj.date)
+            if (obj.types[0] != 'myself') {
+                newItems.push(obj)
+                datesUpdated.push(obj.date)
+            }
         }
 
         //Index newItems and update config-file with new dates
         si.add(newItems, {
             'batchName': config.categories,
             fieldOptions: [
-                {fieldName: 'title',  weight: 3},
-                {fieldName: 'text',  weight: 4},
                 {fieldName: 'categories', filter: true},
                 {fieldName: 'types', filter: true},
                 {fieldName: 'tags', filter: true}
